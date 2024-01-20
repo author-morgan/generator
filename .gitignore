@@ -1,52 +1,131 @@
-# Prerequisites
-*.d
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
 
-# Linker output
-*.ilk
-*.map
-*.exp
+#define MAX_LENGTH 100
 
-# Precompiled Headers
-*.gch
-*.pch
+char *generatePassword(int length, int useNumbers, int useUppercase, int useLowercase, int useSpecialChars) {
+    char charset[MAX_LENGTH] = "";
+    char *password = malloc((length + 1) * sizeof(char));
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+    if (useNumbers)
+        strcat(charset, "0123456789");
+    if (useUppercase)
+        strcat(charset, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    if (useLowercase)
+        strcat(charset, "abcdefghijklmnopqrstuvwxyz");
+    if (useSpecialChars)
+        strcat(charset, "!@#$%^&*");
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+    srand(time(NULL));
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+    for (int i = 0; i < length; i++) {
+        int index = rand() % strlen(charset);
+        password[i] = charset[index];
+    }
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+    password[length] = '\0';
+    return password;
+}
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+char *generatePassphrase(int length, int choice) {
+    const char *fruitList[] = {
+        "apple", "banana", "cherry", "lemon", "orange", "watermelon"
+    };
+
+    const char *animalList[] = {
+        "dog", "elephant", "frog", "kangaroo", "monkey", "penguin", "tiger", "zebra"
+    };
+
+    const char *instrumentList[] = {
+        "guitar", "piano", "violin", "trumpet", "drums", "flute"
+    };
+
+    int wordCount;
+    const char **wordlist;
+
+    switch (choice) {
+        case 1:
+            wordlist = fruitList;
+            wordCount = sizeof(fruitList) / sizeof(fruitList[0]);
+            break;
+        case 2:
+            wordlist = animalList;
+            wordCount = sizeof(animalList) / sizeof(animalList[0]);
+            break;
+        case 3:
+            wordlist = instrumentList;
+            wordCount = sizeof(instrumentList) / sizeof(instrumentList[0]);
+            break;
+        default:
+            printf("Invalid choice. Generating a default passphrase.\n");
+            wordlist = fruitList;
+            wordCount = sizeof(fruitList) / sizeof(fruitList[0]);
+            break;
+    }
+
+    char *passphrase = malloc((length * 2 + 1) * sizeof(char));
+
+    srand(time(NULL));
+
+    for (int i = 0; i < length; i++) {
+        int index = rand() % wordCount;
+        strcat(passphrase, wordlist[index]);
+        if (i < length - 1)
+            strcat(passphrase, "-");
+    }
+
+    return passphrase;
+}
+
+int main() {
+    int isPassphrase;
+
+    printf("Generate a password (0) or a passphrase (1)? ");
+    scanf("%d", &isPassphrase);
+
+    if (isPassphrase) {
+        int passwordLength;
+        int passphraseTypeChoice;
+
+        printf("Enter the desired length: ");
+        scanf("%d", &passwordLength);
+
+        printf("Choose the type of passphrase:\n");
+        printf("1 - Fruit names\n");
+        printf("2 - Animal names\n");
+        printf("3 - Instrument names\n");
+        printf("Enter your choice: ");
+        scanf("%d", &passphraseTypeChoice);
+
+        char *passphrase = generatePassphrase(passwordLength, passphraseTypeChoice);
+        printf("\nGenerated Passphrase: %s\n", passphrase);
+        free(passphrase);
+    } else {
+        int passwordLength;
+        int useNumbers, useUppercase, useLowercase, useSpecialChars;
+
+        printf("Enter the desired length: ");
+        scanf("%d", &passwordLength);
+
+        printf("Include numbers? (1 for Yes, 0 for No): ");
+        scanf("%d", &useNumbers);
+
+        printf("Include uppercase letters? (1 for Yes, 0 for No): ");
+        scanf("%d", &useUppercase);
+
+        printf("Include lowercase letters? (1 for Yes, 0 for No): ");
+        scanf("%d", &useLowercase);
+
+        printf("Include special characters? (1 for Yes, 0 for No): ");
+        scanf("%d", &useSpecialChars);
+
+        char *password = generatePassword(passwordLength, useNumbers, useUppercase, useLowercase, useSpecialChars);
+        printf("\nGenerated Password: %s\n", password);
+        free(password);
+    }
+
+    return 0;
+}
